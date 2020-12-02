@@ -1,0 +1,77 @@
+# Headers
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.prestashop.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; object-src 'none'; frame-src https://api.prestashop.com https://addons.prestashop.com;";
+
+# Redirect 404 errors to prestashop
+error_page 404 /index.php?controller=404;
+
+# [REQUIRED EDIT IF MULTILANG]
+# rewrite ^/fr$ /fr/ redirect;
+# rewrite ^/fr/(.*) /$1;
+
+# Images
+rewrite ^/([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$1$2$3.jpg last;
+rewrite ^/([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$1$2$3$4.jpg last;
+rewrite ^/([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$3/$1$2$3$4$5.jpg last;
+rewrite ^/([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$3/$4/$1$2$3$4$5$6.jpg last;
+rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$3/$4/$5/$1$2$3$4$5$6$7.jpg last;
+rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$3/$4/$5/$6/$1$2$3$4$5$6$7$8.jpg last;
+rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$3/$4/$5/$6/$7/$1$2$3$4$5$6$7$8$9.jpg last;
+rewrite ^/([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])([0-9])(-[_a-zA-Z0-9-]*)?(-[0-9]+)?/.+.jpg$ /img/p/$1/$2/$3/$4/$5/$6/$7/$8/$1$2$3$4$5$6$7$8$9$10.jpg last;
+rewrite ^/c/([0-9]+)(-[.*_a-zA-Z0-9-]*)(-[0-9]+)?/.+.jpg$ /img/c/$1$2$3.jpg last;
+rewrite ^/c/([a-zA-Z_-]+)(-[0-9]+)?/.+.jpg$ /img/c/$1$2.jpg last;
+
+# AlphaImageLoader for IE and fancybox
+rewrite ^images_ie/?([^/]+)\.(jpe?g|png|gif)$ js/jquery/plugins/fancybox/images/$1.$2 last;
+
+# Web service API
+rewrite ^/api/?(.*)$ /webservice/dispatcher.php?url=$1 last;
+
+# Installation sandbox
+rewrite ^(/install(?:-dev)?/sandbox)/(.*) /$1/test.php last;
+
+# Installation
+location /install { index index.php; }
+location ~ ^/install/index\.php(/|$) { echo_exec @phpfpm; }
+
+# Force files inupload directory to be downloaded
+location ~ ^/upload/ {
+    add_header Content-Disposition Attachment;
+    add_header X-Content-Type-Options nosniff;
+}
+
+# [REQUIRED EDIT] Change this block to your admin folder
+location /admin-dev/ {
+    if (!-e $request_filename) {
+        rewrite ^/.*$ /admin-dev/index.php last;
+    }
+}
+
+# File security
+# .htaccess .DS_Store .htpasswd etc
+location ~ /\. {
+    deny all;
+}
+# Source code directories
+location ~ ^/(app|bin|cache|classes|config|controllers|docs|localization|override|src|tests|tools|translations|travis-scripts|vendor|var)/ {
+    deny all;
+}
+# vendor in modules directory
+location ~ ^/modules/.*/vendor/ {
+    deny all;
+}
+# Prevent exposing other sensitive files
+location ~ \.(yml|log|tpl|twig|sass)$ {
+    deny all;
+}
+
+# Prevent injection of php files
+location /upload {
+    location ~ \.php$ {
+        deny all;
+    }
+}
+location /img {
+    location ~ \.php$ {
+        deny all;
+    }
+}
