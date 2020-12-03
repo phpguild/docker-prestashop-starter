@@ -1,20 +1,22 @@
 #!/usr/bin/env sh
 
 PRESTASHOP_VERSION="1.7.6.9"
-PROJECT_NAME="${1}"
-
-if [ -z "${PROJECT_NAME}" ]; then
-  echo "Please specify project name (project_name)"
-  exit
-fi
+PROJECT_NAME="$(basename "$PWD")"
 
 if [ ! -f composer.lock ]; then
-  rm -v README.md
   wget "https://getcomposer.org/composer-stable.phar" -O composer.phar
   chmod -v +x composer.phar
-  ./composer.phar install
+  php -d memory_limit=-1 composer.phar -v req phpguild/docker-web-standard
+  php -d memory_limit=-1 composer.phar -v --no-dev --optimize-autoloader install
   rm -v composer.phar
-  mv -v .rewrite.conf.dist .rewrite.conf
+fi
+
+if [ ! -f .gitignore ]; then
+  echo "/vendor/" > .gitignore
+fi
+
+if [ ! -f .rewrite.conf ]; then
+    wget "https://raw.githubusercontent.com/phpguild/docker-prestashop-starter/master/.rewrite.conf.dist" -O .rewrite.conf
 fi
 
 if [ ! -f public/composer.lock ]; then
