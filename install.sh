@@ -10,7 +10,7 @@ if [ ! -f composer.lock ]; then
   php -d memory_limit=-1 composer.phar -v req phpguild/docker-web-standard
   php -d memory_limit=-1 composer.phar -v --no-dev --optimize-autoloader install
   rm -v composer.phar
-  wget "https://raw.githubusercontent.com/phpguild/docker-prestashop-starter/master/.rewrite.conf.dist" -O .rewrite.conf
+  wget "https://raw.githubusercontent.com/phpguild/docker-prestashop-starter/master/install/.rewrite.conf" -O .rewrite.conf
 fi
 
 if [ ! -f .gitignore ] || ! grep -q "/vendor/" .gitignore; then
@@ -26,5 +26,6 @@ if [ ! -f public/composer.lock ]; then
 fi
 
 sed -i "s/myapp/${PROJECT_NAME}/g" Makefile
-sudo make setup/server && service nginx restart
+sudo make setup/server
+sudo service nginx restart
 make install
