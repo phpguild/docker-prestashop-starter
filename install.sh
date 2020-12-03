@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 set -e
 
 PRESTASHOP_VERSION="1.7.6.9"
