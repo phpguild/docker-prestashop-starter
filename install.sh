@@ -1,4 +1,5 @@
-#!/usr/bin/env sh
+#!/bin/sh
+set -e
 
 PRESTASHOP_VERSION="1.7.6.9"
 PROJECT_NAME="$(basename "$PWD")"
